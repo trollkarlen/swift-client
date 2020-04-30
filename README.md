@@ -81,7 +81,8 @@ let credentials = {
   "username": "user",
   "password": "pasword",
   "domainId": "e6efe92d05c2430ea7eb6f626815d0d8",
-  "projectId": "ff912d95d2eb46099e755cd268714d37"
+  "projectId": "ff912d95d2eb46099e755cd268714d37",
+  "regionId": "GRA", // Optional
 }
 
 let client = new SwiftClient(new SwiftClient.KeystoneV3Authenticator(credentials));
