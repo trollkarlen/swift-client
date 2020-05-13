@@ -88,7 +88,7 @@ class KeystoneV3Authenticator extends EventEmitter {
 
     const tokenPreRefreshInterval = 10000; // renew tokens 10s before they expire
     const requestedTokenExpiry = new Date(Date.now() + tokenPreRefreshInterval)
-    if (requestedTokenExpiry > this.currentToken.expires_at) {
+    if (requestedTokenExpiry > this.currentToken.expires) {
       this.currentToken = await this.getToken();
     }
 
