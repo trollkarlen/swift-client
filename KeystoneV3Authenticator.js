@@ -76,7 +76,7 @@ class KeystoneV3Authenticator extends EventEmitter {
 
     return {
       token: response.headers['x-subject-token'],
-      expires: new Date(response.body.expires_at), // expires_at is an ISO 8601 Date:
+      expires: new Date(response.body.token.expires_at), // expires_at is an ISO 8601 Date:
       swiftUrl: swiftUrl
     }
   };
