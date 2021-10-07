@@ -12,6 +12,10 @@ class KeystoneV3Authenticator extends EventEmitter {
   }
 
   tryFindEndpointUrl(catalog, service, iface, regionId) {
+    if (typeof iface === 'undefined') {
+      iface = "public";
+    }
+
     const catalogEntry = catalog.find(x => x.name === service);
     if (!catalogEntry) {
       return null;
@@ -67,8 +71,8 @@ class KeystoneV3Authenticator extends EventEmitter {
 
     const catalog = response.body.token.catalog;
     const swiftUrl =
-      this.tryFindEndpointUrl(catalog, 'swift', 'public', credentials.regionId)
-      || this.tryFindEndpointUrl(catalog, 'radosgw-swift', 'public', credentials.regionId); // many OpenStack clouds use ceph radosgw to provide swift
+      this.tryFindEndpointUrl(catalog, 'swift', credentials.endpointUrlInterface, credentials.regionId)
+      || this.tryFindEndpointUrl(catalog, 'radosgw-swift', credentials.endpointUrlInterface, credentials.regionId); // many OpenStack clouds use ceph radosgw to provide swift
 
     if (!swiftUrl) {
       throw new Error('could not find swift or radosgw-swift service in catalog');
@@ -80,7 +84,7 @@ class KeystoneV3Authenticator extends EventEmitter {
       swiftUrl: swiftUrl
     }
   };
-  
+
   async authenticate() {
     if (!this.currentToken) {
       this.currentToken = await this.getToken();
