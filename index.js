@@ -1,7 +1,7 @@
 "use strict";
 
 const URL = require('url-parse');
-const requestp = require('request-promise');
+const axios = require('axios');
 
 const SwiftContainer = require('./SwiftContainer');
 const SwiftEntity = require('./SwiftEntity');
@@ -11,7 +11,6 @@ const KeystoneV3Authenticator = require('./KeystoneV3Authenticator');
 class SwiftClient extends SwiftEntity {
     constructor(authenticator) {
         super('Container', null, authenticator);
-        
     }
 
     create(name, publicRead, meta, extra) {
@@ -26,9 +25,9 @@ class SwiftClient extends SwiftEntity {
             extra['x-container-read'] = '.r:*';
         }
 
-        return this.authenticator.authenticate().then(auth => requestp({
+        return this.authenticator.authenticate().then(auth => axios({
             method: 'PUT',
-            uri: `${auth.url}/${name}`,
+            url: `${auth.url}/${name}`,
             headers: this.headers(meta, extra, auth.token)
         }));
     }
@@ -40,9 +39,9 @@ class SwiftClient extends SwiftEntity {
     async info() {
         const auth = await this.authenticator.authenticate();
         const infoUrl = (new URL(auth.url)).origin + "/info";
-        return requestp({
+        return axios({
             method: 'GET',
-            uri: infoUrl,
+            url: infoUrl,
             json: true
         })
     }

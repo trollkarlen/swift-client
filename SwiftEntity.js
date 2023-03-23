@@ -1,6 +1,6 @@
 "use strict";
 
-const requestp = require('request-promise');
+const axios = require('axios');
 const queryString = require('query-string');
 
 class SwiftEntity {
@@ -12,25 +12,25 @@ class SwiftEntity {
 
     list(extra, query) {
         const querystring = query ? '?' + queryString.stringify(query) : '';
-        return this.authenticator.authenticate().then(auth => requestp({
-            uri: auth.url + this.urlSuffix + querystring,
+        return this.authenticator.authenticate().then(auth => { return axios({
+            url: auth.url + this.urlSuffix + querystring,
             headers: this.headers(null, extra, auth.token),
             json: true
-        }));
+        }).then((response) => response.data); });
     }
 
     update(name, meta, extra) {
-        return this.authenticator.authenticate().then(auth => requestp({
+        return this.authenticator.authenticate().then(auth => axios({
             method: 'POST',
-            uri: `${auth.url + this.urlSuffix}/${name}`,
+            url: `${auth.url + this.urlSuffix}/${name}`,
             headers: this.headers(meta, extra, auth.token)
-        }));
+        }).then((response) => response.data));
     }
 
     meta(name) {
-        return this.authenticator.authenticate().then(auth => requestp({
+        return this.authenticator.authenticate().then(auth => axios({
             method: 'HEAD',
-            uri: `${auth.url + this.urlSuffix}/${name}`,
+            url: `${auth.url + this.urlSuffix}/${name}`,
             headers: this.headers(null, null, auth.token),
             resolveWithFullResponse: true
         }).then(response => {
@@ -40,7 +40,6 @@ class SwiftEntity {
 
             for (const k in headers) {
                 const m = k.match(regex);
-
                 if (m) {
                     meta[m[1]] = headers[k];
                 }
@@ -51,9 +50,9 @@ class SwiftEntity {
     }
 
     delete(name) {
-        return this.authenticator.authenticate().then(auth => requestp({
+        return this.authenticator.authenticate().then(auth => axios({
             method: 'DELETE',
-            uri: `${auth.url + this.urlSuffix}/${name}`,
+            url: `${auth.url + this.urlSuffix}/${name}`,
             headers: this.headers(null, null, auth.token)
         }));
     }

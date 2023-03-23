@@ -1,7 +1,7 @@
 "use strict";
 
 const EventEmitter = require('events');
-const requestp = require('request-promise');
+const axios = require('axios');
 
 const AUTH_STATUS = {
     UNAUTHENTICATED: 0,
@@ -24,9 +24,9 @@ class SwiftAuthenticator extends EventEmitter {
         let authError = null;
 
         // Starts authStatus process
-        requestp({
+        axios({
             method: 'GET',
-            uri: authUrl,
+            url: authUrl,
             headers: {
                 'x-auth-user': username,
                 'x-auth-key': password

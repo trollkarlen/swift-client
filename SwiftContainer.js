@@ -1,7 +1,6 @@
 "use strict";
 
-const request = require('request');
-const requestp = require('request-promise');
+const axios = require('axios');
 const SwiftEntity = require('./SwiftEntity');
 
 class SwiftContainer extends SwiftEntity {
@@ -12,21 +11,20 @@ class SwiftContainer extends SwiftEntity {
     create(name, stream, meta, extra) {
 
         return this.authenticator.authenticate().then(auth => new Promise((resolve, reject) => {
-            const req = request({
+            const req = axios({
                 method: 'PUT',
-                uri: `${auth.url + this.urlSuffix}/${name}`,
-                headers: this.headers(meta, extra, auth.token)
-            }).on('error', err => {
-                reject(err);
-            }).on('response', response => {
-                if (response.statusCode === 201) {
+                url: `${auth.url + this.urlSuffix}/${name}`,
+                headers: this.headers(meta, extra, auth.token),
+                data: stream,
+            }).then(response => {
+                if (response.status === 201) {
                     resolve();
                 } else {
-                    reject(new Error(`HTTP ${response.statusCode}`));
+                    reject(new Error(`HTTP ${response.statusText}(${response.status})`));
                 }
+            }).catch(err => {
+                reject(err);
             });
-
-            stream.pipe(req);
         }));
     }
 
@@ -43,9 +41,9 @@ class SwiftContainer extends SwiftEntity {
             }
 
             return this.authenticator.authenticate().then(auth => {
-                return requestp({
+                return axios({
                     method: 'POST',
-                    uri: `${auth.url + this.urlSuffix}/${name}`,
+                    url: `${auth.url + this.urlSuffix}/${name}`,
                     headers: this.headers(null, h, auth.token)
                 });
             });
@@ -57,17 +55,21 @@ class SwiftContainer extends SwiftEntity {
 
     get(name, stream) {
         return this.authenticator.authenticate().then(auth => new Promise((resolve, reject) => {
-            request({
+            axios({
                 method: 'GET',
-                uri: `${auth.url + this.urlSuffix}/${name}`,
+                url: `${auth.url + this.urlSuffix}/${name}`,
                 headers: {
                     'x-auth-token': auth.token
-                }
-            }).on('error', err => {
-                reject(err);
-            }).on('end', () => {
+                },
+                responseType: 'stream'
+            }).then((response) => {
+              response.data.on('end',  () => {
                 resolve();
-            }).pipe(stream);
+              });
+              response.data.pipe(stream);
+            }).catch(err => {
+                reject(err);
+            });
         }));
     }
 }

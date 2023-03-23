@@ -1,7 +1,7 @@
 "use strict";
 
 const EventEmitter = require('events');
-const requestp = require('request-promise');
+const axios = require('axios');
 
 class KeystoneV3Authenticator extends EventEmitter {
   constructor(credentials) {
@@ -58,18 +58,18 @@ class KeystoneV3Authenticator extends EventEmitter {
       }
     };
 
-    const response = await requestp({
+    const response = await axios({
       method: 'POST',
-      uri: credentials.endpointUrl + '/auth/tokens',
+      url: credentials.endpointUrl + '/auth/tokens',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      json: model,
+      data: model,
       resolveWithFullResponse: true
     });
 
-    const catalog = response.body.token.catalog;
+    const catalog = response.data.token.catalog;
     const swiftUrl =
       this.tryFindEndpointUrl(catalog, 'swift', credentials.endpointUrlInterface, credentials.regionId)
       || this.tryFindEndpointUrl(catalog, 'radosgw-swift', credentials.endpointUrlInterface, credentials.regionId); // many OpenStack clouds use ceph radosgw to provide swift
@@ -80,7 +80,7 @@ class KeystoneV3Authenticator extends EventEmitter {
 
     return {
       token: response.headers['x-subject-token'],
-      expires: new Date(response.body.token.expires_at), // expires_at is an ISO 8601 Date:
+      expires: new Date(response.data.token.expires_at), // expires_at is an ISO 8601 Date:
       swiftUrl: swiftUrl
     }
   };
