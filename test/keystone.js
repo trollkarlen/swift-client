@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 const expect = require('chai').expect;
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const KeystoneV3Authenticator = require('../KeystoneV3Authenticator');
 const credentials = require('./credentials.ksv3.json');
 
@@ -11,11 +11,15 @@ chai.use(chaiAsPromised);
 describe('KeystoneV3Authenticator', function () {
   this.timeout(4000);
 
-  describe('with valid credentials', () => {
-    const client = new KeystoneV3Authenticator(credentials);
+  describe('with valid credentials', function() {
+    var client;
 
-    describe('getToken', () => {
-      it('can get a token', async () => {
+    before(function () {
+      client = new KeystoneV3Authenticator(credentials);
+    });
+
+    describe('getToken', function() {
+      it('can get a token', async function() {
         const token = await client.getToken();
 
         expect(token.token).to.be.a('string');
@@ -27,7 +31,7 @@ describe('KeystoneV3Authenticator', function () {
         expect(token.swiftUrl).to.contain('http');
       });
 
-      it('fails with invalid credentials', async () => {
+      it('fails with invalid credentials', async function() {
         const token = await client.getToken();
 
         expect(token.token).to.be.a('string');
@@ -40,8 +44,8 @@ describe('KeystoneV3Authenticator', function () {
       });
     });
 
-    describe('authenticate', () => {
-      it('returns token and url', async () => {
+    describe('authenticate', function() {
+      it('returns token and url', async function() {
         const result = await client.authenticate();
 
         expect(result.token).to.be.a('string');
@@ -51,7 +55,7 @@ describe('KeystoneV3Authenticator', function () {
         expect(result.url).to.contain('http');
       });
 
-      it('returns the same token on repeated invocations', async () => {
+      it('returns the same token on repeated invocations', async function() {
         const result = await client.authenticate();
         const repeat = await client.authenticate();
 
@@ -59,19 +63,23 @@ describe('KeystoneV3Authenticator', function () {
       });
     });
 
-    describe('with invalid credentials', () => {
-      const invalidCredentials = Object.assign({}, credentials, { password: 'wrong' });
-      const client = new KeystoneV3Authenticator(invalidCredentials);
+    describe('with invalid credentials', function() {
+      var client;
 
-      describe('getToken', () => {
-        it('fails', () => {
+      before(function () {
+        const invalidCredentials = Object.assign({}, credentials, { password: 'wrong' });
+        client = new KeystoneV3Authenticator(invalidCredentials);
+      });
+
+      describe('getToken', function() {
+        it('fails', function() {
           const token = client.getToken();
           expect(token).eventually.be.rejected.with.any;
         });
       });
 
-      describe('authenticate', () => {
-        it('fails', () => {
+      describe('authenticate', function() {
+        it('fails', function() {
           const token = client.authenticate();
           expect(token).eventually.be.rejected.with.any;
         });

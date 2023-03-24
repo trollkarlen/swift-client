@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const EventEmitter = require('events');
 const axios = require('axios');
@@ -13,7 +13,7 @@ class KeystoneV3Authenticator extends EventEmitter {
 
   tryFindEndpointUrl(catalog, service, iface, regionId) {
     if (typeof iface === 'undefined') {
-      iface = "public";
+      iface = 'public';
     }
 
     const catalogEntry = catalog.find(x => x.name === service);
@@ -82,8 +82,8 @@ class KeystoneV3Authenticator extends EventEmitter {
       token: response.headers['x-subject-token'],
       expires: new Date(response.data.token.expires_at), // expires_at is an ISO 8601 Date:
       swiftUrl: swiftUrl
-    }
-  };
+    };
+  }
 
   async authenticate() {
     if (!this.currentToken) {
@@ -91,7 +91,7 @@ class KeystoneV3Authenticator extends EventEmitter {
     }
 
     const tokenPreRefreshInterval = 10000; // renew tokens 10s before they expire
-    const requestedTokenExpiry = new Date(Date.now() + tokenPreRefreshInterval)
+    const requestedTokenExpiry = new Date(Date.now() + tokenPreRefreshInterval);
     if (requestedTokenExpiry > this.currentToken.expires) {
       this.currentToken = await this.getToken();
     }
