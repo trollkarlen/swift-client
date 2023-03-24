@@ -42,16 +42,19 @@ class KeystoneV3Authenticator extends EventEmitter {
               name: credentials.username,
               password: credentials.password,
               domain: {
-                id: credentials.domainId
+                id: credentials.domainId || null,
+                name: credentials.domainName || null
               }
             }
           }
         },
         scope: {
           project: {
-            id: credentials.projectId,
+            id: credentials.projectId || null,
+            name: credentials.projectName || null,
             domain: {
-              id: credentials.domainId
+              id: credentials.domainId || null,
+              name: credentials.domainName || null
             }
           }
         }
