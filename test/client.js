@@ -12,9 +12,9 @@ describe('SwiftClient', function () {
 
   var client;
 
-  before(function () {
+  before(async function () {
     client = new SwiftClient(new SwiftClient.KeystoneV3Authenticator(credentials));
-    return client.create('swift-client-test');
+    return await client.create('swift-client-test');
   });
 
 
@@ -64,9 +64,9 @@ describe('SwiftClient', function () {
         .then(() => container.create('sub/test.txt', s2));
     });
 
-    after(function() {
-      container.delete('test.txt');
-      return container.delete('sub/test.txt');
+    after(async function() {
+      await container.delete('test.txt');
+      return await container.delete('sub/test.txt');
     });
 
     describe('#list', function() {
@@ -119,5 +119,15 @@ describe('SwiftClient', function () {
     });
   });
 
-  after(function() { return client.delete('swift-client-test'); });
+  after(async function() {
+    if (client) {
+      var container = await client.container('swift-client-test');
+      var objects = await container.list();
+      if (objects.length > 0) {
+        console.error(objects);
+      }
+      return await client.delete('swift-client-test');
+    }
+    //return client.delete('swift-client-test');
+  });
 });
