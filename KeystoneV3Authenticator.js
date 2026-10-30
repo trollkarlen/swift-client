@@ -3,6 +3,23 @@
 const EventEmitter = require('events');
 const axios = require('axios');
 
+// Build a Keystone reference to a domain or project.
+//
+// Keystone validates this object strictly, so we may only send keys we
+// actually have:
+//   * `{"id": null}` / `{"name": null}` are rejected outright with HTTP 400
+//     ("Invalid input ... None is not of type 'string'"), which is why the
+//     field must be omitted rather than nulled when it is not configured;
+//   * sending BOTH `id` and `name` for the same entity is also an error
+//     ("Cannot use both id and name"), so an id wins when both are given.
+// Callers that configure only OS_PROJECT_ID / OS_PROJECT_DOMAIN_ID (ids, no
+// names) must therefore produce exactly `{"id": "<id>"}`.
+function identify(id, name) {
+  if (id) return { id };
+  if (name) return { name };
+  return {};
+}
+
 class KeystoneV3Authenticator extends EventEmitter {
   constructor(credentials) {
     super();
@@ -41,22 +58,15 @@ class KeystoneV3Authenticator extends EventEmitter {
             user: {
               name: credentials.username,
               password: credentials.password,
-              domain: {
-                id: credentials.domainId || null,
-                name: credentials.domainName || null
-              }
+              domain: identify(credentials.domainId, credentials.domainName)
             }
           }
         },
         scope: {
-          project: {
-            id: credentials.projectId || null,
-            name: credentials.projectName || null,
-            domain: {
-              id: credentials.domainId || null,
-              name: credentials.domainName || null
-            }
-          }
+          project: Object.assign(
+            identify(credentials.projectId, credentials.projectName),
+            { domain: identify(credentials.domainId, credentials.domainName) }
+          )
         }
       }
     };
